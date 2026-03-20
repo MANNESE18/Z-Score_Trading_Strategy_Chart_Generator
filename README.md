@@ -1,12 +1,12 @@
 # Stock vs. Index Z-Score Mean Reversion Strategy
 
 
-This project implements a quantitative pair-trading strategy that evaluates the relative strength between a specific equity and a benchmark index. By utilizing a Z-Score calculation derived from the price ratio of the two assets, the strategy identifies statistical outliers (overbought or oversold conditions) to execute mean-reversion trades. The tool allows for side-by-side backtesting of two different tactical windows and sensitivity thresholds, providing a visual and statistical comparison of how different parameters affect performance metrics like the Sharpe Ratio and Total Return.
+This project implements a quantitative pair-trading strategy that evaluates the relative strength between a specific equity and a benchmark index. By utilizing a **Z-Score** calculation derived from the price ratio of the two assets, the strategy identifies statistical outliers (overbought or oversold conditions) to execute mean-reversion trades. The tool allows for side-by-side backtesting of two different tactical windows and sensitivity thresholds, providing a visual and statistical comparison of how different parameters affect performance metrics like the Sharpe Ratio and Total Return.
 
 
 ## Features
 
-* **Dynamic Data Retrieval**: Integrates with the yfinance API to fetch real-time and historical price data for any valid stock and index ticker.
+* **Dynamic Data Retrieval**: Integrates with the `yfinance` API to fetch real-time and historical price data for any valid stock and index ticker.
 
 * **Comparative Backtesting**: Supports dual-charting to compare two distinct strategy configurations (different spans and Z-score thresholds) simultaneously.
 
@@ -34,11 +34,11 @@ This project implements a quantitative pair-trading strategy that evaluates the 
 ## Key Achievements in Code
 
 
-* **Automated Signal Logic**: Developed a robust np.where logic gate that identifies entry and exit points based on user-defined standard deviation (σ) thresholds, handling both long and short regimes seamlessly.
+* **Automated Signal Logic**: Developed a robust `np.where` logic gate that identifies entry and exit points based on user-defined standard deviation (σ) thresholds, handling both long and short regimes seamlessly.
 
-* **Vectorized Backtesting**: Built a cumulative return engine using .pct_change() and .cumprod(), allowing for rapid performance calculation across years of data without the need for slow iterative loops.
+* **Vectorized Backtesting**: Built a cumulative return engine using `.pct_change()` and `.cumprod()`, allowing for rapid performance calculation across years of data without the need for slow iterative loops.
 
 * **Advanced Statistical Indicators**: Successfully implemented automated calculations for the Sharpe Ratio (annualized by  
-252), Beta, and R-Squared, providing institutional-grade risk metrics for the strategy.
+252), **Beta**, and **R-Squared**, providing institutional-grade risk metrics for the strategy.
 
 Adaptive Charting: Designed a flexible Matplotlib subplot architecture that shares X-axis data (dates) while independently rendering tactical windows and return data for two different strategy variants.
