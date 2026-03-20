@@ -12,6 +12,8 @@ This project implements a quantitative pair-trading strategy that evaluates the 
 
 * **Volatility-Adjusted Weighting**: Implements an inverse-volatility weighting scheme to balance the position sizes between the "higher" and "lower" priced assets in the pair.
 
+* **Automated Error Handling**: Includes robust input validation for tickers, date ranges, and numerical parameters to ensure the script doesn't crash on "bad" user data.
+
 * **Statistical Benchmarking**: Automatically calculates and displays Correlation, R-Squared, and Beta between the stock and the index to provide context for the strategy's viability.
 
 * **Performance Visualization**: Generates professional-grade Matplotlib dashboards featuring Z-score signal tracking, cumulative return curves, and shaded "In Market" periods.
