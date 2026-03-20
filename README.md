@@ -38,7 +38,6 @@ This project implements a quantitative pair-trading strategy that evaluates the 
 
 * **Vectorized Backtesting**: Built a cumulative return engine using `.pct_change()` and `.cumprod()`, allowing for rapid performance calculation across years of data without the need for slow iterative loops.
 
-* **Advanced Statistical Indicators**: Successfully implemented automated calculations for the Sharpe Ratio (annualized by  
-252), **Beta**, and **R-Squared**, providing institutional-grade risk metrics for the strategy.
+* **Advanced Statistical Indicators**: Successfully implemented automated calculations for the Sharpe Ratio (annualized by  $\sqrt{252}$), **Beta**, and **R-Squared**, providing institutional-grade risk metrics for the strategy.
 
-Adaptive Charting: Designed a flexible Matplotlib subplot architecture that shares X-axis data (dates) while independently rendering tactical windows and return data for two different strategy variants.
+* **Adaptive Charting**: Designed a flexible Matplotlib subplot architecture that shares X-axis data (dates) while independently rendering tactical windows and return data for two different strategy variants.
