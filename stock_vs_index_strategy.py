@@ -4,20 +4,71 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import yfinance as yf
+import sys
 
 # prompts user for inputs
+# add layers of protection for bad inputs
 stock_ticker = input("Enter Stock Ticker or Type 'quit' to exit:").upper()
 index_ticker = input("Enter Index Ticker or Type 'quit' to exit:").upper()
-span_1 = int(input("Enter span value for chart #1:"))
-span_2 = int(input("Enter span value for chart #2:"))
-z_score_1 = float(input("Enter z-score threshold for chart #1:"))
-z_score_2 = float(input("Enter z-score threshold for chart #2:"))
-start_year = int(input("Enter start year for study:"))
-end_year = int(input("Enter end year for study:"))
+
+if stock_ticker == 'QUIT' or index_ticker == 'QUIT':
+        print('Exiting Program')
+        sys.exit()
+
+while True:
+    try:
+        span_1 = int(input("Enter span value for chart #1:"))
+        break
+    except ValueError:
+        print("Error: Span #1 must be a whole number.")
+
+while True:
+    try:
+        span_2 = int(input("Enter span value for chart #2:"))
+        break
+    except ValueError:
+        print("Error: Span #2 must be a whole number.")
+
+while True:
+    try:
+        z_score_1 = float(input("Enter z-score threshold for chart #1:"))
+        break
+    except ValueError:
+        print("Error: Z-Score #1 must be a number (ex. 2.0).")
+
+while True:
+    try:
+        z_score_2 = float(input("Enter z-score threshold for chart #2:"))
+        break
+    except ValueError:
+        print("Error: Z-Score #1 must be a number (ex. 2.0).")
+        
+while True:
+    try:
+        start_year = int(input("Enter start year for study:"))
+        end_year = int(input("Enter end year for study:"))
+        if start_year>=end_year:
+            print("Error: Start year must be before end year")
+        break
+    except ValueError:
+        print("Error: Years must be whole numbers and start_year must be before end_year.")
 
 data_start = start_year-1
 
+# downloads info from yfinance API based on inputs from user
 data = yf.download([stock_ticker, index_ticker], start=f"{data_start}-01-01", auto_adjust=True)
+
+if data.empty:
+    print("Error: No data found at all.  Check internet or tickers.")
+    sys.exit()
+
+if stock_ticker not in data.columns.get_level_values(1):
+    print(f"Error: '{stock_ticker}' is not a real ticker.")
+    sys.exit()
+
+if index_ticker not in data.columns.get_level_values(1):
+    print(f"Error: '{index_ticker}' is not a real ticker.")
+    sys.exit()
 
 # sets up data frames
 stock_index_1 = data['Close'].copy()
@@ -198,11 +249,11 @@ a.set_ylabel('Z-Score')
 a.axhline(z_score_1, color='black', linestyle='--', linewidth=1.5, label=f'Sell/Short Threshold ({z_score_1}σ)')
 a.axhline(-z_score_1, color='black', linestyle='--', linewidth=1.5, label=f'Sell/Short Threshold (-{z_score_1}σ)')
 a.fill_between(stock_index_chart_1.index, z_score_1, stock_index_chart_1['z_score'], 
-               where=(stock_index_chart_1['z_score'].values >= z_score_1), 
-               color='gray', alpha=0.4, label='Overbought')
+            where=(stock_index_chart_1['z_score'].values >= z_score_1), 
+            color='gray', alpha=0.4, label='Overbought')
 a.fill_between(stock_index_chart_1.index, -z_score_1, stock_index_chart_1['z_score'], 
-               where=(stock_index_chart_1['z_score'].values <= -z_score_1), 
-               color='gray', alpha=0.4, label='Oversold')
+            where=(stock_index_chart_1['z_score'].values <= -z_score_1), 
+            color='gray', alpha=0.4, label='Oversold')
 a.axhline(0, color='black', linewidth=1)
 a.grid(True, alpha=.5)
 
@@ -232,11 +283,11 @@ b.set_ylabel('Z-Score')
 b.axhline(z_score_2, color='black', linestyle='--', linewidth=1.5, label=f'Sell/Short Threshold ({z_score_2}σ)')
 b.axhline(-z_score_2, color='black', linestyle='--', linewidth=1.5, label=f'Sell/Short Threshold (-{z_score_2}σ)')
 b.fill_between(stock_index_chart_2.index, z_score_2, stock_index_chart_2['z_score'], 
-               where=(stock_index_chart_2['z_score'].values >= z_score_2), 
-               color='gray', alpha=0.4, label='Overbought')
+            where=(stock_index_chart_2['z_score'].values >= z_score_2), 
+            color='gray', alpha=0.4, label='Overbought')
 b.fill_between(stock_index_chart_2.index, -z_score_2, stock_index_chart_2['z_score'], 
-               where=(stock_index_chart_2['z_score'].values <= -z_score_2), 
-               color='gray', alpha=0.4, label='Oversold')
+            where=(stock_index_chart_2['z_score'].values <= -z_score_2), 
+            color='gray', alpha=0.4, label='Oversold')
 b.axhline(0, color='black', linewidth=1)
 b.grid(True, alpha=.5)
 
@@ -259,22 +310,3 @@ d.grid(True, alpha=.5)
 plt.tight_layout()
 plt.show()
     
-
-
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-          
-          
-   
