@@ -1,12 +1,11 @@
 
-
-
+# import required tools
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import yfinance as yf
 
-
+# prompts user for inputs
 stock_ticker = input("Enter Stock Ticker or Type 'quit' to exit:").upper()
 index_ticker = input("Enter Index Ticker or Type 'quit' to exit:").upper()
 span_1 = int(input("Enter span value for chart #1:"))
@@ -20,7 +19,7 @@ data_start = start_year-1
 
 data = yf.download([stock_ticker, index_ticker], start=f"{data_start}-01-01", auto_adjust=True)
 
-
+# sets up data frames
 stock_index_1 = data['Close'].copy()
 stock_index_2 = data['Close'].copy()
 
@@ -34,10 +33,9 @@ stock_index_2 = stock_index_2.rename(columns={
     index_ticker: 'ac_index'
 })
 
+# sets up instructions for creating the two trading strategy scenarios
 
-# chart #1
-
-
+# calculations for initial variables needed
 stock_index_1['SI_Comp'] = stock_index_1['ac_stock']/stock_index_1['ac_index']
 stock_index_1['IS_Comp'] = stock_index_1['ac_index']/stock_index_1['ac_stock']
 stock_index_1['spread'] = np.maximum(stock_index_1['SI_Comp'], stock_index_1['IS_Comp'])
@@ -47,10 +45,12 @@ stock_index_1['z_score'] = (stock_index_1['spread'] - stock_index_1['spread_mean
 
 z_thresh_1 = z_score_1
 
+# helps to define further conditions in code and how the "trades" will be signaled
 stock_index_1['higher'] = np.maximum(stock_index_1['ac_stock'], stock_index_1['ac_index'])
 stock_index_1['lower'] = np.minimum(stock_index_1['ac_stock'], stock_index_1['ac_index'])
 stock_index_1['signal'] = np.where((stock_index_1['z_score'] >= z_thresh_1) | (stock_index_1['z_score'] <= -z_thresh_1), 1, 0)
 
+# calculations for the weights of stock investment
 stock_index_1['daily_return_for_higher'] = stock_index_1['higher'].pct_change()
 stock_index_1['daily_return_for_lower'] = stock_index_1['lower'].pct_change()
 stock_index_1['std_for_higher'] = stock_index_1['daily_return_for_higher'].ewm(span=span_1).std()
@@ -61,11 +61,12 @@ stock_index_1['weight_for_lower'] = (1/stock_index_1['std_for_lower']) / (stock_
 
 # if stock > index, then the action would always be short the stock
 # if stock < index, then the action would always be long the stock
-
+# only investment will be w/ the stock (instructions define whether to short or long the stock)
 strategy_higher_1 = stock_index_1['higher'].pct_change()*stock_index_1['signal'].shift(1)*stock_index_1['weight_for_higher'].shift(1)*(-1)
 strategy_lower_1 = stock_index_1['lower'].pct_change()*(stock_index_1['signal'].shift(1))*(stock_index_1['weight_for_lower'].shift(1))
 stock_index_1['strategy_1'] = np.where(stock_index_1['higher'] == stock_index_1['ac_stock'], strategy_higher_1, strategy_lower_1)
 
+# Sharpe ratio calculations for the strategy
 strategy_daily_1 = stock_index_1['strategy_1'].fillna(0)
 strategy_daily_mean_1 = strategy_daily_1.mean()
 strategy_daily_std_1 = strategy_daily_1.std()
@@ -75,17 +76,17 @@ else:
     sharpe_1 = 0
 sharpe_text_1 = f'Annualized Sharpe: {sharpe_1: .2f}'
 
+# calculates total return of investment to display
 stock_index_1['return'] = ((1 + stock_index_1['strategy_1'].fillna(0)).cumprod()-1)
 return_1 = stock_index_1['return'].iloc[-1]
 return_text_1 = f'Total Return: {return_1:.2%}'
 
+# calculates total number of trades to display
 trade_count_1 = (stock_index_1['signal'].diff() == 1).sum()
 trade_text_1 = f'Total Trades: {trade_count_1}'
 
 
-# chart #2
-
-
+# same instructions as above but it uses the second set of inputs from the user
 stock_index_2['SI_Comp'] = stock_index_2['ac_stock']/stock_index_2['ac_index']
 stock_index_2['IS_Comp'] = stock_index_2['ac_index']/stock_index_2['ac_stock']
 stock_index_2['spread'] = np.maximum(stock_index_2['SI_Comp'], stock_index_2['IS_Comp'])
@@ -128,8 +129,7 @@ trade_count_2 = (stock_index_2['signal'].diff() == 1).sum()
 trade_text_2 = f'Total Trades: {trade_count_2}'
 
 
-# Stock vs. Index Stats
-
+# calculates certain stats to display for the strategy
 stock_index_chart_1 = stock_index_1.truncate(before=f"{start_year}-01-01", after=f"{end_year}-12-31").copy()
 stock_index_chart_2 = stock_index_2.truncate(before=f"{start_year}-01-01", after=f"{end_year}-12-31").copy()
 
@@ -148,7 +148,7 @@ stock_index_chart_1 = stock_index_1.truncate(before=f"{start_year}-01-01", after
 stock_index_chart_2 = stock_index_2.truncate(before=f"{start_year}-01-01", after=f"{end_year}-12-31").copy()
 
 
-# Buy and Hold for stock and index
+# Buy and Hold returns for stock and index
 stock_index_chart_1['stock_daily_return'] = stock_index_chart_1['ac_stock'].pct_change()
 stock_index_chart_1['BandH_stock']= (1 + stock_index_chart_1['stock_daily_return'].fillna(0)).cumprod()-1
 t_return_stock = stock_index_chart_1['BandH_stock'].iloc[-1]
@@ -186,13 +186,11 @@ index_text_both = f'{index_ticker}: {index_sharpe_text} | {t_index_text_1}'
 
 
 # chart setup
-
-
 fig, ((a,b),(c,d)) = plt.subplots(2,2, figsize=(12,10), sharex=True)
 
 fig.suptitle(f'Z-Score Strategy: {stock_ticker} | Correlation: {correlation:.2f} | R-Squared: {r_squared:.2f} | Beta: {beta:.2f}', fontsize=16)
 
-# chart#1
+# z-score chart for strategy #1
 stock_index_chart_1.plot(ax=a, y='z_score')
 a.set_title(f'Z-Score Signal: {z_score_1}-day Tactical Window (Span: {span_1})')
 a.set_xlabel('Year')
@@ -212,6 +210,7 @@ stock_index_chart_1.plot(ax=c, y='return', label = 'Strategy')
 stock_index_chart_1.plot(ax=c, y='BandH_stock', color='orange', label=f'{stock_ticker}')
 stock_index_chart_1.plot(ax=c, y='BandH_index',color='blue', label = f'{index_ticker}')
 
+# investment returns chart for strategy #1
 c.set_title(f'Performance: Aggressive Mean Reversion (Z={z_score_1})')
 c.set_xlabel('Year')
 c.set_ylabel('Total Return (%)')
@@ -225,7 +224,7 @@ c.axhline(0, color='black', linewidth=1, alpha=0.5)
 c.grid(True, alpha=.5)
 
 
-# chart #2
+# z-score chart for strategy #2
 stock_index_chart_2.plot(ax=b, y='z_score')
 b.set_title(f'Z-Score Signal: {z_score_2}-day Tactical Window (Span: {span_2})')
 b.set_xlabel('Year')
@@ -241,6 +240,7 @@ b.fill_between(stock_index_chart_2.index, -z_score_2, stock_index_chart_2['z_sco
 b.axhline(0, color='black', linewidth=1)
 b.grid(True, alpha=.5)
 
+# investment returns chart for strategy #2
 stock_index_chart_2.plot(ax=d, y='return', label = 'Strategy')
 stock_index_chart_1.plot(ax=d, y='BandH_stock', color='orange', label=f'{stock_ticker}')
 stock_index_chart_1.plot(ax=d, y='BandH_index',color='blue', label = f'{index_ticker}')
